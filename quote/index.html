@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+  <head>
+<script type="text/javascript" src="./jl/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="./jl/mm.1.0.js"></script>
+<script type="text/javascript" src="./jl/shortcut.js"></script>
+<script type="text/javascript" src="./main.js"></script>
+
+  <meta charset="utf-8">
+    <title>引用符エスケープ</title>
+  </head>
+  <body>
+    <h1>文字列変換サイト</h1>
+    <em>文字の変換に一部不具合が見つかったため、このページは現在非推奨です。<a href="../">こちらの最新版のサイト</a>をご利用ください</em>
+    <h3>文字列中の改行削除とクォーテーションマーク(引用符)のエスケープ処理</h3>
+    <p>HTMLタグを文字列に変換する時に使えます。<br>⚠XSS攻撃防止などのセキュリティ向上目的には使えません</p><p><hr>
+      使い方の例： <br>・置換後の文字列をjQueryの　$("selecter").html("HTML要素")"　関数の引数として使う <br>など
+    </p>
+    <textarea id="inputarea" rows="8" cols="80"></textarea><br>
+    <button type="button" name="button" id="det">変換</button><br>変換後の文字列をコピー
+<input type="checkbox" id="copy" value="" checked><br>
+    すでに\"になっている部分はエスケープしない<input type="checkbox" id="check" value="" checked><br><br>
+    <textarea id="outputarea" rows="8" cols="80"></textarea><br>
+<a href="..">文字列変換サイトTOPへ</a>
+  </body>
+</html>

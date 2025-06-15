@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="jp" dir="ltr">
+  <head>
+    <link
+      rel="shortcut icon"
+      href="favicon.ico"
+      type="image/vnd.microsoft.icon"
+    />
+    <link rel="apple-touch-icon" href="icon.png" />
+    <script type="text/javascript" src="./jl/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="./jl/mm.1.0.js"></script>
+    <script type="text/javascript" src="./jl/shortcut.js"></script>
+    <link rel="stylesheet" href="./master.css" />
+    <script type="text/javascript" src="./main.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1918692579240633"
+     crossorigin="anonymous"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>正規表現で文字を置換・検索できるツール</title>
+    <meta
+      name="description"
+      content="文字を検索/置換できます。シンプルかつ、正規表現やマクロによる一括での置換も可能な高機能ツールです"
+    />
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>文字列を検索・置換</h1>
+      <p id="explain">文章の高機能な検索・置換ができるWEBサイトです。オプションで正規表現を有効にすることで、文章中の改行や数字などの検索も可能になります</p>
+      
+      <section class="input-section">
+        <h4>検索・置換したい文字を入力▼</h4>
+        <textarea id="inputarea" rows="8" value="" autofocus placeholder="ここに検索・置換したいテキストを入力してください"></textarea>
+        <div class="screen"></div>
+      </section>
+
+      <section class="controls-section">
+        
+        <div class="form-group">
+          <label class="description" for="regex">
+            <span class="storreg">検索する文字</span>
+            <input type="text" name="" value="" id="regex" placeholder="検索したい文字列を入力" />
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="description">
+            <div class="special">
+              <span>　特殊文字</span>
+              <select class="spselect">
+                <option value="">選択してください</option>
+                <option value="1">改行</option>
+                <option value="2">半角数字</option>
+                <option value="3">半角アルファベット</option>
+                <option value="4">半角英数字</option>
+                <option value="5">ホワイトスペース</option>
+              </select>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="description" for="astring">
+            <span>置換先の文字列</span>
+            <textarea id="astring" value="" rows="3" placeholder="置換後の文字列を入力"></textarea>
+          </label>
+        </div>
+      </section>
+                  <section class="options-section">
+                  <div class="form-group">
+          <label class="description" for="regok">
+            <input type="checkbox" id="regok" value="" />
+            <span>正規表現を有効にする</span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="copy" class="description">
+            <input type="checkbox" id="copy" value="" checked />
+            <span>置換後の文字列を自動コピー</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="quote" class="description">
+            <input type="checkbox" id="quote" value="" />
+            <span>置換後の文字列を""で囲む</span>
+          </label>
+        </div>
+      </section>
+      <button type="button" name="button" id="det">置換 (Ctrl+Enter)</button>
+
+      <hr style="margin: 20px 0; border: none; height: 1px; background: #e1e8ed;" />
+
+      <section class="output-section">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+          <h4 id="outp">出力エリア▼</h4>
+          <a id="change" href="javascript:change()">入力⇄出力 入れ替え</a>
+        </div>
+        <textarea id="outputarea" rows="8" cols="" placeholder="置換結果がここに表示されます"></textarea>
+      </section>
+
+    <div class="description">
+      <div class="URL">
+        <strong>現在の検索/置換条件のURL</strong>
+        <br />
+        <span id="tocopy" style="word-break: break-all; font-family: monospace; font-size: 12px;"></span><br />
+        <div class="form-group" style="margin-top: 15px;">
+          <label for="include" class="description">
+            <input type="checkbox" id="include" value="" />
+            <span>URLに入力エリアの情報も含める</span>
+          </label>
+        </div>
+        <button id="copyme">URLをコピー</button>
+      </div>
+
+      <div id="macro">
+        <strong>マクロ機能</strong> - 複数の置換処理を一気に行うマクロが作れます
+        <button id="register" style="margin-left: 15px;">マクロの登録</button>
+      </div>
+
+      <section class="info-section">
+        <h3>正規表現を用いた変換の仕様について</h3>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 10px 0;">
+          <p style="margin: 0;">
+            正規表現を有効にした場合、文字の検索に正規表現が使えるようになります。置換後文字列に入力した内容は正規表現として解釈されません。「$1」のような変数による、正規表現内でキャプチャした文字列の再利用は有効です。內部ではJavaScriptのreplace関数を使っていますので、詳細についてはそちらもご参照ください
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <section class="macros-section">
+      <h3>マクロ一覧</h3>
+      <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <ul>
+          <li>
+            <a
+              href="./index.html?query=%7B%22list%22%3A%5B%5B%22%2F%5C%5Ct%2Fg%22%2C%22%5C%5Ct%22%2Ctrue%5D%2C%5B%22%2F%5C%5Cn%2Fg%22%2C%22%5C%5Cn%22%2Ctrue%5D%2C%5B%22%5C%22%22%2C%22%5C%5C%5C%22%22%2Cfalse%5D%2C%5B%22'%22%2C%22%5C%5C'%22%2Cfalse%5D%2C%5B%22%5C%5C%22%2C%22%5C%5C%5C%5C%22%2Cfalse%5D%5D%7D"
+              >文字列のエスケープ（プログラミングなどで使える形にします）</a
+            >
+            <ul>
+              <li>改行→\n</li>
+              <li>タブ→\t</li>
+              <li>"→\"</li>
+              <li>'→\'</li>
+              <li>\→\\</li>
+            </ul>
+          </li>
+          <li>
+            <a
+              href="./index.html?query=%7B%22list%22%3A%5B%5B%22%2F%5C%5C%5C%5Cn%2Fg%22%2C%22%5Cn%22%2Ctrue%5D%2C%5B%22%2F%5C%5C%5C%5Ct%2Fg%22%2C%22%09%22%2Ctrue%5D%2C%5B%22%2F%5C%5C%5C%22%2Fg%22%2C%22%5C%22%22%2Ctrue%5D%2C%5B%22%2F%5C%5C%5C%5C%27%2Fg%22%2C%22%27%22%2Ctrue%5D%2C%5B%22%2F%5C%5C%5B%5E%5C%5C%5D%2Fg%22%2C%22%22%2Ctrue%5D%5D%7D"
+              >エスケープされた文字列の復元</a
+            >
+          </li>
+
+          <li>
+            <a
+              href="./index.html?query=%7B%22list%22%3A%5B%5B%22%26%22%2C%22%26amp%22%2Cfalse%5D%2C%5B%22%5C%22%22%2C%22%26quot%22%2Cfalse%5D%2C%5B%22%5C%22%22%2C%22%26quot%22%2Cfalse%5D%2C%5B%22%5C%22%22%2C%22%26quot%3B%22%2Cfalse%5D%2C%5B%22%26%22%2C%22%26amp%3B%22%2Cfalse%5D%2C%5B%22%3C%22%2C%22%26lt%3B%22%2Cfalse%5D%2C%5B%22%3E%22%2C%22%26gt%3B%22%2Cfalse%5D%5D%7D"
+              >HTMLエスケープ</a
+            >
+          </li>
+          <li>
+            <a
+              href="./index.html?query=%7B%22list%22%3A%5B%5B%22%2F%5C%5Cn%2Fg%22%2C%22%E2%80%A8%22%2Ctrue%5D%5D%7D"
+              >改行を含む文字列をTwitterのアカウント名に設定可能な特殊文字に変換</a
+            >
+            <p style="margin-top: 10px; font-size: 14px; color: #666;">
+              ※通常の方法では出力がコピーできない場合があるため、画面中の「出力をコピー」ボタンから出力をコピーしてください
+            </p>
+          </li>
+          <li>
+            <a
+              href="./index.html?query=%7B%22list%22%3A%5B%5B%22%2F%5E%2Fg%22%2C%22import+inspect%5Cn%22%2Ctrue%5D%2C%5B%22%2F%28.%2B%29%5C%5Cn%2Fg%22%2C%22%241%3Bprint%28f%27%7Binspect.currentframe%28%29.f_lineno%7D+at+%7Binspect.currentframe%28%29.f_code.co_name%7D%3A%241%27%29%5Cn%22%2Ctrue%5D%2C%5B%22%2F%3A%3Bprint%28.%2B%3F%29%5C%5Cn%28%5B%5C%5Cs%5C%5CS%5D%2A%3F%29%3Bprint%5C%5C%28%2Fg%22%2C%22%3A%5Cn%242%3Bprint%28%241%29%3Bprint%28%22%2Ctrue%5D%2C%5B%22%2F%3A%3Bprint%28.%2B%3F%29%3Bprint%28.%2B%3F%29%5C%5Cn%28.%2A%29%5C%5Cn%2Fg%22%2C%22%3A%5Cn%243%3Bprint%28%241%29%3Bprint%28%242%29%5Cn%22%2Ctrue%5D%2C%5B%22%2F%3A%3Bprint%28.%2B%3F%29%3Bprint%28.%2B%3F%29%5C%5Cn%28.%2A%29%5C%5Cn%2Fg%22%2C%22%3A%5Cn%243%3Bprint%28%241%29%3Bprint%28%242%29%5Cn%22%2Ctrue%5D%2C%5B%22%2F%5E%28%5B%5E%5C%5Cn%5D%2A%3F%29%40%28%5B%5E%5C%5Cn%5D%2B%3F%29%3Bprint%5C%5C%28%5B%5E%5C%5Cn%5D%2B%5C%5C%29%5C%5Cn%2Fgm%22%2C%22%241print%28f%27%7Binspect.currentframe%28%29.f_lineno%7D+at+%7Binspect.currentframe%28%29.f_code.co_name%7D%3A%241%40%242%27%29%5Cn%241%40%242%5Cn%22%2Ctrue%5D%2C%5B%22%2F%5C%5C%5C%5C%3Bprint%5C%5C%28.%2B%5C%5C%29%5C%5Cn%2Fg%22%2C%22%5C%5C%5Cn%22%2Ctrue%5D%2C%5B%22%2F%5C%5C%28%3Bprint%5C%5C%28.%2B%5C%5C%29%5C%5Cn%2Fg%22%2C%22%28%5Cn%22%2Ctrue%5D%2C%5B%22%2F%2C%3Bprint%5C%5C%28.%2B%5C%5C%29%5C%5Cn%2Fg%22%2C%22%2C%5Cn%5Cn%22%2Ctrue%5D%5D%7D"
+              >Pythonのコードの各行にその行の内容をprintする構文を追加</a
+            >
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="related-services">
+      <h3>管理人が開発している他のサービス（抜粋）</h3>
+      <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <ul>
+          <li><a href="http://reversi.yuki-lab.com/ai">リバーシWeb | 無料で遊べるオセロゲーム</a>：AI対戦や友達対戦などの機能がある人気サービスです</li>
+          <li><a href="https://encode-url.yuki-lab.com">日本語URLを簡単にエンコード！</a>：コピペするだけ！XなどSNSでの投稿時にも便利です</li>
+          <li><a href="https://web.sfc.keio.ac.jp/~t21055yi/timer/">コマンド操作も可能な高性能タイマー</a></li>
+        </ul>
+      </div>
+    </section>
+
+    </div>
+  </body>
+</html>
