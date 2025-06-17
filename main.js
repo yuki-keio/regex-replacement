@@ -396,7 +396,6 @@ function makeURL(now = true) {
   const regex = document.getElementById('regex');
   const astring = document.getElementById('astring');
   const regok = document.getElementById('regok');
-  const inputarea = document.getElementById('inputarea');
 
   if (now) {
     const serch = regex.value;
@@ -496,6 +495,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const ob = JSON.parse(query);
     if (ob.regex) {
       document.getElementById('regok').checked = true;
+      localStorage.setItem("regexEnabled", "true");
+      document.getElementById('regok').dispatchEvent(new Event('change'));
+    } else {
+      document.getElementById('regok').checked = false;
+      localStorage.setItem("regexEnabled", "false");
       document.getElementById('regok').dispatchEvent(new Event('change'));
     }
     if ("regex" in ob) {
