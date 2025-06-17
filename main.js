@@ -230,41 +230,46 @@ function stchange(replace = true) {
       }
     } else {
       divtext = "";
-      let loop = 0;
-      val = inputarea.value;
-      loop = iValue.search(reg);
-      count = [];
-      if (loop !== -1) {
-        const matches = iValue.match(reg);
-        if (matches) {
-          matches.forEach(function (content, index) {
-            count[index] = content.length;
-          });
+      let currentPos = 0;
+      let match;
+
+      // 正規表現のグローバル検索を適切に処理
+      if (reg.global) {
+        reg.lastIndex = 0; // グローバル検索のインデックスをリセット
+      }
+
+      // 新しい正規表現オブジェクトを作成（元のオブジェクトの状態を保持するため）
+      const searchReg = new RegExp(reg.source, reg.flags);
+
+      while ((match = searchReg.exec(iValue)) !== null) {
+        // マッチする前の部分を追加
+        divtext += escape_html(iValue.slice(currentPos, match.index));
+
+        // マッチした部分をハイライト
+        const matchedText = match[0]
+          .replace(/\n/g, "↓改行(uewouiwbyuvbruywbuyiecbuervbcuerivbceurvevberuyebcuervcbuyuecbyue)")
+          .replace(/\s/g, "・")
+          .replace("改行(uewouiwbyuvbruywbuyiecbuervbcuerivbceurvevberuyebcuervcbuyuecbyue)", "\n");
+        divtext += '<span class="yellow">' + escape_html(matchedText) + '</span>';
+
+        currentPos = match.index + match[0].length;
+
+        // グローバル検索でない場合は1回だけ
+        if (!reg.global) {
+          break;
+        }
+
+        // 無限ループ防止
+        if (match[0].length === 0) {
+          searchReg.lastIndex++;
+        }
+        if (searchReg.lastIndex >= iValue.length) {
+          break;
         }
       }
 
-      let lcount = 0;
-      if (
-        loop > 0 &&
-        count.reduce(function (p, c) {
-          return Math.max(p, c);
-        }) > 0
-      ) {
-        while (loop !== -1) {
-          inSpan(loop, count[lcount]);
-          iValue = iValue.slice(loop + count[lcount], iValue.length);
-          loop = iValue.search(reg);
-
-          lcount++;
-          if (lcount >= 1000) {
-            alert(
-              "検索が終了しないため、一時的に検索結果の表示を停止しました。置換は可能です"
-            );
-            throw new Error([loop, count[lcount], iValue]);
-          }
-        }
-      }
-      divtext += escape_html(iValue);
+      // 残りの部分を追加
+      divtext += escape_html(iValue.slice(currentPos));
       screen.innerHTML = divtext.replace(/\n/g, "<br>");
     }
   } else {
@@ -303,7 +308,7 @@ function stchange(replace = true) {
         while (loop !== -1) {
           inSpan(loop, mlength);
           iValue = iValue.slice(loop + mlength, iValue.length);
-          loop = iValue.search(reg);
+          loop = iValue.indexOf(reg);
           lscount++;
           //if (lscount>=10000) throw new Error([loop,mlength,iValue]);
         }
@@ -582,9 +587,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (isChecked) {
       document.querySelector('.storreg').textContent = "正規表現　　 ";
-      document.getElementById('regex').value = "/正規表現を入力/g";
+      if (document.getElementById('regex').value === "") {
+        document.getElementById('regex').value = "/正規表現を入力/g";
+      }
       document.getElementById('regex').selectionStart = 1;
-      document.getElementById('regex').selectionEnd = 8;
+      document.getElementById('regex').selectionEnd = document.getElementById('regex').value.length - 2;
       document.getElementById('regex').focus();
       document.getElementById('regex').dispatchEvent(new Event('change'));
       document.querySelector('.special').innerHTML = "";
