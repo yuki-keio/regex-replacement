@@ -1,22 +1,19 @@
-let targetc="";
-let iValue="";
+let targetc = "";
+let iValue = "";
 function esquote() {
-  iValue=$("#inputarea").val();
-if ($("#check").prop("checked")){
-  target="\""+(iValue.replace(/([^\\]*?)(["'])/g,"$1\\$2")).replace(/\n/g,"")+"\"";
-  $("#outputarea").val(target);
-
-}else{
-  target="\""+(iValue.replace(/["']/g,"\\\"")).replace(/\n/g,"")+"\""
-  $("#outputarea").val(target);
-
+  iValue = document.getElementById('inputarea').value;
+  if (document.getElementById('check').checked) {
+    target = '"' + (iValue.replace(/([^\\]*?)(["'])/g, "$1\\$2")).replace(/\n/g, "") + '"';
+    document.getElementById('outputarea').value = target;
+  } else {
+    target = '"' + (iValue.replace(/["']/g, '\\"')).replace(/\n/g, "") + '"';
+    document.getElementById('outputarea').value = target;
+  }
+  if (document.getElementById('copy').checked) {
+    navigator.clipboard.writeText(target);
+  }
 }
-if ($("#copy").prop("checked")){
-  navigator.clipboard.writeText(target);
-}
 
-}
-$(function() {
-$("#det").click(esquote);
-
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('det').addEventListener('click', esquote);
 });
