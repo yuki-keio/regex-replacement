@@ -546,8 +546,10 @@ document.addEventListener('DOMContentLoaded', function () {
       if (e.target.value === "") {
         return;
       }
-      document.getElementById('regok').checked = true;
-      document.getElementById('regok').dispatchEvent(new Event('change'));
+      if (!document.getElementById('regok').checked) {
+        document.getElementById('regok').checked = true;
+        document.getElementById('regok').dispatchEvent(new Event('change'));
+      }
       switch (e.target.value) {
         case "1":
           document.getElementById('regex').value = "/\\n/g";
@@ -598,15 +600,12 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('regex').selectionEnd = document.getElementById('regex').value.length - 2;
       document.getElementById('regex').focus();
       document.getElementById('regex').dispatchEvent(new Event('change'));
-      document.querySelector('.special').innerHTML = "";
       console.log("正規表現モードが有効になりました");
     } else {
       document.querySelector('.storreg').textContent = "検索する文字 ";
       document.getElementById('regex').value = "";
       document.getElementById('regex').focus();
       document.getElementById('regex').dispatchEvent(new Event('change'));
-      document.querySelector('.special').innerHTML =
-        '　特殊文字　:　<select class="spselect" name="">      <option value="">選択してください</option>      <option value="1">改行</option>      <option value="2">数字</option>      <option value="3">アルファベット</option>      <option value="4">半角英数字</option>      <option value="5">ホワイトスペース</option>    </select>';
       console.log("通常の検索モードに切り替わりました");
     }
   });

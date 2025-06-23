@@ -139,14 +139,16 @@
             <li><code>\d</code> : 数字（0-9）</li>
             <li><code>\w</code> : 英数字とアンダースコア</li>
             <li><code>\s</code> : 空白文字（スペース、タブ、改行）</li>
+            <li><code>[abc]</code> : a、b、cのいずれかの文字にマッチ</li>
+            <li><code>[^abc]</code> : a、b、c以外の文字にマッチ</li>
           </ul>
         </div>
         <div style="background: #e8f5e8; padding: 15px; border-radius: 6px; margin: 10px 0;">
           <p style="margin: 0 0 10px 0; font-weight: bold;">使用例</p>
           <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
-            <li><code><a href="http://127.0.0.1:3000/index.html?query=%7B%22list%22%3A%5B%22%2F%5Ba-zA-Z0-9._%25%2B-%5D%2B%40%5Ba-zA-Z0-9.-%5D%2B%5C%5C.%5Ba-zA-Z%5D%7B2%2C%7D%2Fg%22%2C%22%5Breplaced%5D%22%5D%2C%22regex%22%3Atrue%7D&content=example1%40gmail.com%2C%20example2%40gmail.com%2C%20example3%40gmail.com">[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}</a></code> : メールアドレス</li>
-            <li><code>\s+</code> : 連続する空白文字</li>
-            <li><code>^[A-Z]</code> : 行頭の大文字</li>
+            <li>メールアドレスの正規表現：<code><a href="?query=%7B%22list%22%3A%5B%22%2F%5Ba-zA-Z0-9._%25%2B-%5D%2B%40%5Ba-zA-Z0-9.-%5D%2B%5C%5C.%5Ba-zA-Z%5D%7B2%2C%7D%2Fg%22%2C%22%5Breplaced%5D%22%5D%2C%22regex%22%3Atrue%7D&content=example1%40gmail.com%2C%20example2%40gmail.com%2C%20example3%40gmail.com">[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}</a></code></li>
+            <li>郵便番号の正規表現：<code><a href="?query=%7B%22list%22%3A%5B%22%2F(%3F%3C!%5C%5Cd)%5B0-9%5D%7B3%7D-%5B0-9%5D%7B4%7D(%3F!%5C%5Cd)%2Fg%22%2C%22%5Breplaced%5D%22%5D%2C%22regex%22%3Atrue%7D&content=123-4567%2C%20%E3%80%92123-4567%2C%2001234-56789">(?&lt;!\d)[0-9]{3}-[0-9]{4}(?!\d)</a></code></li>
+            <li>URLの正規表現：<code><a href="?query=%7B%22list%22%3A%5B%22%2Fhttps%3F%3A%2F%2F%5B%5C%5Cw!%3F%2F%2B%5C%5C-_~%3B.*%26%40%23%24%25()'%5B%5C%5C%5D%5D%2B%2Fg%22%2C%22%5Breplaced%5D%22%5D%2C%22regex%22%3Atrue%7D&content=https%3A%2F%2Fwww.example.com%2Fpath%2Fto%2Fresource%2C%20http%3A%2F%2Fexample.org%2F">https?://[\w!?/+\-_~;.*&@#$%()'[\]]+</a></code></li>
           </ul>
         </div>
       </section>
@@ -211,37 +213,6 @@
         </ul>
       </div>
     </section>
-
-    <section class="regex-guide-section">
-      <h3>正規表現の基本的な使い方</h3>
-      <p style="margin: 0 0 10px 0;">
-        正規表現を使うと、特定のパターンにマッチする文字列を簡単に検索・置換できます。以下は、よく使われる正規表現記号とその意味です。
-      </p>
-      <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 10px 0;">
-        <p style="margin: 0 0 10px 0; font-weight: bold;">よく使う正規表現の意味</p>
-        <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
-          <li><code>.</code> : 任意の1文字にマッチ</li>
-          <li><code>*</code> : 直前の文字が0回以上の繰り返し</li>
-          <li><code>+</code> : 直前の文字が1回以上の繰り返し</li>
-          <li><code>?</code> : 直前の文字が0回または1回</li>
-          <li><code>^</code> : 行の始まり</li>
-          <li><code>$</code> : 行の終わり</li>
-          <li><code>\d</code> : 数字（0-9）</li>
-          <li><code>\w</code> : 英数字とアンダースコア</li>
-          <li><code>\s</code> : 空白文字（スペース、タブ、改行）</li>
-        </ul>
-      </div>
-      <div style="background: #e8f5e8; padding: 15px; border-radius: 6px; margin: 10px 0;">
-        <p style="margin: 0 0 10px 0; font-weight: bold;">使用例</p>
-        <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
-          <li><code>\d+</code> : 数字の連続（123、45など）</li>
-          <li><code>^[A-Z]</code> : 行頭の大文字</li>
-          <li><code>.+@.+\.[a-zA-Z]{2,}</code> : メールアドレス</li>
-          <li><code>\s+</code> : 連続する空白文字</li>
-        </ul>
-      </div>
-    </section>
-
     </div>
   </body>
 </html>
