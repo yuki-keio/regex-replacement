@@ -12,6 +12,61 @@ let inc = false;
 let mtimes = 1;
 let activeMacro = {};
 
+// 新しいUI用のヘルパー関数
+let isUpdatingFromUI = false; // 無限ループ防止フラグ
+
+function updateFlags(flagString) {
+  document.getElementById('flagG').checked = flagString.includes('g');
+  document.getElementById('flagI').checked = flagString.includes('i');
+  document.getElementById('flagM').checked = flagString.includes('m');
+  document.getElementById('flagS').checked = flagString.includes('s');
+  document.getElementById('flagU').checked = flagString.includes('u');
+  document.getElementById('flagY').checked = flagString.includes('y');
+}
+
+function getFlagsFromUI() {
+  let flags = '';
+  if (document.getElementById('flagG').checked) flags += 'g';
+  if (document.getElementById('flagI').checked) flags += 'i';
+  if (document.getElementById('flagM').checked) flags += 'm';
+  if (document.getElementById('flagS').checked) flags += 's';
+  if (document.getElementById('flagU').checked) flags += 'u';
+  if (document.getElementById('flagY').checked) flags += 'y';
+  return flags;
+}
+
+function updateRegexFromUI() {
+  if (isUpdatingFromUI) return; // 無限ループ防止
+
+  const pattern = document.getElementById('regexPattern').value;
+  const flags = getFlagsFromUI();
+  const regex = document.getElementById('regex');
+
+  isUpdatingFromUI = true;
+  regex.value = `/${pattern}/${flags}`;
+  regex.dispatchEvent(new Event('change'));
+  isUpdatingFromUI = false;
+}
+
+// regex要素の変更をregexPatternに反映する関数
+function syncRegexToPattern() {
+  if (isUpdatingFromUI) return; // 無限ループ防止
+
+  const regok = document.getElementById('regok');
+  if (regok.checked) {
+    const regex = document.getElementById('regex');
+    const regexPattern = document.getElementById('regexPattern');
+
+    const match = regex.value.match(/^\/(.*)\/([gimsuvy]*)$/);
+    if (match) {
+      isUpdatingFromUI = true;
+      regexPattern.value = match[1];
+      updateFlags(match[2]);
+      isUpdatingFromUI = false;
+    }
+  }
+}
+
 // TODO https://www.google.com/search?q=キー+windows+mac+対応+javascript
 function change() {
   const inputarea = document.getElementById('inputarea');
@@ -88,7 +143,7 @@ function stchange(replace = true) {
         if (replace) {
           if (
             confirm(
-              "正規表現を認識できませんでした。原因としては正規表現を//で囲んでいない可能性があります。修正しますか?\n\nエラーメッセージ▼\n" +
+              "正規表現を認識できませんでした。\n\nエラーメッセージ▼\n" +
               e
             )
           ) {
@@ -96,6 +151,7 @@ function stchange(replace = true) {
             regex.selectionStart = 1;
             regex.selectionEnd = 8;
             regex.focus();
+            syncRegexToPattern(); // 正規表現モードの場合にregexPatternに反映
           } else {
             if (
               confirm(
@@ -111,29 +167,29 @@ function stchange(replace = true) {
       switch (e.message) {
         case "undefined is not an object (evaluating 'regValue.slice')":
           outputarea.value =
-            "正規表現に関してエラーが発生しました。正規表現は/で囲ってください\n例：正規表現/g";
+            "正規表現に関してエラーが発生しました。";
           break;
 
         case "Invalid regular expression: missing )":
           outputarea.value =
-            "正規表現に関してエラーが発生しました。正規表現中の(を閉じるかでエスケープしてください\n例：/正(規(表現)/g";
+            "正規表現に関してエラーが発生しました。正規表現中の(を閉じるか\\でエスケープしてください\n例：/正(規(表現)/g";
           break;
         case "Invalid regular expression: unmatched parentheses":
           outputarea.value =
-            "正規表現に関してエラーが発生しました。正規表現中の)を閉じるかでエスケープしてください\n例：/正)規(表現)/g";
+            "正規表現に関してエラーが発生しました。正規表現中の)を閉じるか\\でエスケープしてください\n例：/正)規(表現)/g";
           break;
         case "Invalid regular expression:  at end of pattern":
           outputarea.value =
-            "正規表現に関してエラーが発生しました。正規表現の終わりにを書くのをやめるか、でをエスケープしてください\n例：/正規表現\\/g";
+            "正規表現に関してエラーが発生しました。正規表現の終わりに\\を書くのをやめるか、\\で\\をエスケープしてください\n例：/正規表現\\/g";
           break;
 
         case "Invalid regular expression: missing terminating ] for character class":
           outputarea.value =
-            "正規表現に関してエラーが発生しました。正規表現中の[を閉じるかでエスケープしてください\n例：/正[規[表現]/g";
+            "正規表現に関してエラーが発生しました。正規表現中の[を閉じるか\\でエスケープしてください\n例：/正[規[表現]/g";
           break;
         case "Invalid flags supplied to RegExp constructor.":
           outputarea.value =
-            "正規表現に関してエラーが発生しました。文末の/の後には有効なフラグを使用するか、何も書かないでください\n例：/正規表現/gu";
+            "正規表現に関してエラーが発生しました";
           break;
         default:
           outputarea.value = "正規表現に関してエラーが発生しました▼\n" + e;
@@ -161,6 +217,7 @@ function stchange(replace = true) {
             regex.selectionStart = 1;
             regex.selectionEnd = 8;
             regex.focus();
+            syncRegexToPattern(); // 正規表現モードの場合にregexPatternに反映
           } else {
             if (
               confirm(
@@ -175,7 +232,7 @@ function stchange(replace = true) {
       switch (e.message) {
         case "undefined is not an object (evaluating 'regValue.slice')":
           outputarea.value =
-            "正規表現に関してエラーが発生しました。正規表現は/で囲ってください\n例：/正規表現/g";
+            "正規表現に関して「未定義」エラーが発生しました。";
           break;
 
         case "Invalid regular expression: missing )":
@@ -197,7 +254,7 @@ function stchange(replace = true) {
           break;
         case "Invalid flags supplied to RegExp constructor.":
           outputarea.value =
-            "正規表現に関してエラーが発生しました。文末の/の後には有効なフラグを使用するか、何も書かないでください\n例：/正規表現/gu";
+            "正規表現のフラグに関してエラーが発生しました。";
           break;
         default:
           outputarea.value = "正規表現に関してエラーが発生しました▼\n" + e;
@@ -263,7 +320,7 @@ function stchange(replace = true) {
         if (match[0].length === 0) {
           searchReg.lastIndex++;
         }
-        if (searchReg.lastIndex >= iValue.length) {
+        if (searchReg.lastIndex > iValue.length) {
           break;
         }
       }
@@ -505,6 +562,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if ("regex" in ob) {
       document.getElementById('regex').value = ob.list[0];
       document.getElementById('astring').value = ob.list[1];
+      syncRegexToPattern(); // 正規表現モードの場合にregexPatternに反映
     } else {
       if (isNotPC()) {
         document.getElementById('det').textContent = "出力をコピー";
@@ -569,6 +627,7 @@ document.addEventListener('DOMContentLoaded', function () {
         default:
       }
       document.getElementById('regex').dispatchEvent(new Event('change'));
+      syncRegexToPattern(); // 正規表現モードの場合にregexPatternに反映
     }
   });
   document.getElementById('include').addEventListener('change', function (e) {
@@ -587,25 +646,46 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.getElementById('regok').addEventListener('change', function (e) {
     const isChecked = e.target.checked;
+    const regexMode = document.getElementById('regexMode');
+    const regex = document.getElementById('regex');
 
     // localStorageに状態を保存
     localStorage.setItem("regexEnabled", isChecked.toString());
 
     if (isChecked) {
       document.querySelector('.storreg').textContent = "正規表現　　 ";
-      if (document.getElementById('regex').value === "") {
-        document.getElementById('regex').value = "/正規表現を入力/g";
+      regexMode.style.display = 'block';
+      regex.style.display = 'none';
+
+      // 既存の値を新しいUIに移行
+      const currentValue = regex.value;
+      if (currentValue && currentValue.startsWith('/') && currentValue.includes('/')) {
+        const match = currentValue.match(/^\/(.*)\/([gimsuvy]*)$/);
+        if (match) {
+          document.getElementById('regexPattern').value = match[1];
+          updateFlags(match[2]);
+        }
+      } else {
+        // 初期状態の設定
+        document.getElementById('regexPattern').value = "";
+        document.getElementById('flagG').checked = true;
+        document.getElementById('flagI').checked = false;
+        document.getElementById('flagM').checked = false;
+        document.getElementById('flagS').checked = false;
+        document.getElementById('flagU').checked = false;
+        document.getElementById('flagY').checked = false;
+        updateRegexFromUI();
       }
-      document.getElementById('regex').selectionStart = 1;
-      document.getElementById('regex').selectionEnd = document.getElementById('regex').value.length - 2;
-      document.getElementById('regex').focus();
-      document.getElementById('regex').dispatchEvent(new Event('change'));
+
+      document.getElementById('regexPattern').focus();
       console.log("正規表現モードが有効になりました");
     } else {
       document.querySelector('.storreg').textContent = "検索する文字 ";
-      document.getElementById('regex').value = "";
-      document.getElementById('regex').focus();
-      document.getElementById('regex').dispatchEvent(new Event('change'));
+      regexMode.style.display = 'none';
+      regex.style.display = 'block';
+      regex.value = "";
+      regex.focus();
+      regex.dispatchEvent(new Event('change'));
       console.log("通常の検索モードに切り替わりました");
     }
   });
@@ -626,6 +706,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const regexEnabled = localStorage.getItem("regexEnabled");
   if (regexEnabled === "true") {
     document.getElementById('regok').checked = true;
+    // 正規表現モードのUIを表示
+    document.getElementById('regexMode').style.display = 'block';
+    document.getElementById('regex').style.display = 'none';
+    document.querySelector('.storreg').textContent = "正規表現　　 ";
     document.getElementById('regok').dispatchEvent(new Event('change'));
   } else if (regexEnabled === null) {
     // 初回訪問時はデフォルトでfalse
@@ -659,4 +743,45 @@ document.addEventListener('DOMContentLoaded', function () {
     // 初回訪問時はデフォルトでfalse
     localStorage.setItem("includeEnabled", "false");
   }
+
+  document.getElementById('regexPattern').addEventListener('input', updateRegexFromUI);
+  document.getElementById('flagG').addEventListener('change', updateRegexFromUI);
+  document.getElementById('flagI').addEventListener('change', updateRegexFromUI);
+  document.getElementById('flagM').addEventListener('change', updateRegexFromUI);
+  document.getElementById('flagS').addEventListener('change', updateRegexFromUI);
+  document.getElementById('flagU').addEventListener('change', updateRegexFromUI);
+  document.getElementById('flagY').addEventListener('change', updateRegexFromUI);
+
+  // regex要素の変更を監視して、正規表現モードの時にregexPatternに反映
+  const regexInput = document.getElementById('regex');
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+        syncRegexToPattern();
+      }
+    });
+  });
+
+  // 値の変更も監視
+  regexInput.addEventListener('input', syncRegexToPattern);
+  regexInput.addEventListener('change', syncRegexToPattern);
+
+  // プロパティの変更を監視
+  observer.observe(regexInput, { attributes: true, attributeFilter: ['value'] });
+
+  // 詳細設定の開閉機能
+  document.getElementById('advancedToggle').addEventListener('click', function () {
+    const panel = document.getElementById('regexFlagsPanel');
+    const icon = this.querySelector('.toggle-icon');
+
+    if (panel.style.display === 'none') {
+      panel.style.display = 'block';
+      icon.classList.add('rotated');
+      this.querySelector('span').textContent = '閉じる';
+    } else {
+      panel.style.display = 'none';
+      icon.classList.remove('rotated');
+      this.querySelector('span').textContent = 'フラグ設定';
+    }
+  });
 });
