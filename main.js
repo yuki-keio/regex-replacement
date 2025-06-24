@@ -528,6 +528,10 @@ function isNotPC() {
 document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('tocopy').innerHTML =
     '<a href="' + location.href + '">' + location.href + "</a>";
+  document.getElementById('regex').addEventListener('change', function () {
+    stchange(false);
+    makeURL();
+  });
   if (isNotPC()) {
     document.getElementById('det').textContent = "置換";
   } else {
@@ -546,9 +550,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const param = new URL(location.href).searchParams;
   const query = param.get("query");
   const content = param.get("content");
-
-  if (query === null) {
-  } else {
+  if (query !== null) {
     const ob = JSON.parse(query);
     if (ob.regex) {
       document.getElementById('regok').checked = true;
@@ -563,6 +565,9 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('regex').value = ob.list[0];
       document.getElementById('astring').value = ob.list[1];
       syncRegexToPattern(); // 正規表現モードの場合にregexPatternに反映
+      setTimeout(() => {
+        document.getElementById('regex').dispatchEvent(new Event('change'));
+      }, 30);
     } else {
       if (isNotPC()) {
         document.getElementById('det').textContent = "出力をコピー";
@@ -587,10 +592,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.getElementById('regex').addEventListener('keyup', function () {
     document.getElementById('regex').dispatchEvent(new Event('change'));
-  });
-  document.getElementById('regex').addEventListener('change', function () {
-    stchange(false);
-    makeURL();
   });
   document.getElementById('astring').addEventListener('keyup', function () {
     makeURL();
