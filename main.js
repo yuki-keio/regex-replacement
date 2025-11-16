@@ -515,7 +515,7 @@ document.addEventListener('DOMContentLoaded', function () {
     makeURL();
   });
   if (!isNotPC()) {
-    document.getElementById('change').textContent = "入力エリアと出力エリアの内容を入れ替える (Ctrl+I)";
+    document.getElementById('change').textContent = "入力欄を出力結果で置き換え (Ctrl+I)";
     document.getElementById('register').textContent = "マクロの登録 (Ctrl+M)";
   }
   shortcut.add("Ctrl+Enter", function () {
