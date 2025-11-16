@@ -23,8 +23,8 @@
 
   <body>
     <div class="container">
-      <h1>文字列を検索・置換</h1>
-      <p id="explain">文章の検索・置換ができるWEBサイトです。正規表現を使って改行・数字・文字パターンを効率的に検索・置換できる他、マクロを用いた高度な操作も可能です。初心者向けの使い方ガイドも掲載しています</p>
+      <h1>正規表現で検索・置換</h1>
+      <p id="explain">文章の検索・置換ができるWEBサイトです。正規表現を使って改行・数字・文字パターンを効率的に検索・置換できる他、マクロを用いた高度な操作も可能です</p>
       
       <section class="input-section">
         <h4>検索・置換したい文字を入力▼</h4>
@@ -44,7 +44,7 @@
         <!-- 正規表現モード用のUI -->
         <div class="form-group regex-mode" id="regexMode" style="display: none;">
           <label class="description">
-            <span>正規表現パターン</span>
+            <span>検索に使う正規表現</span>
             <input type="text" id="regexPattern" placeholder="例：\d（数字）、[a-z]（小文字）" />
           </label>
           <div class="regex-advanced-settings">
@@ -118,17 +118,10 @@
                   <section class="options-section">
                   <div class="form-group">
           <label class="description" for="regok">
-            <input type="checkbox" id="regok" value="" />
+            <input type="checkbox" id="regok" value="" checked />
             <span>正規表現を有効にする</span>
           </label>
         </div>
-        <div class="form-group">
-          <label for="copy" class="description">
-            <input type="checkbox" id="copy" value="" checked />
-            <span>置換後の文字列を自動コピー</span>
-          </label>
-        </div>
-
         <div class="form-group">
           <label for="quote" class="description">
             <input type="checkbox" id="quote" value="" />
@@ -136,14 +129,29 @@
           </label>
         </div>
       </section>
-      <button type="button" name="button" id="det">置換 (Ctrl+Enter)</button>
-
       <hr style="margin: 20px 0; border: none; height: 1px; background: #e1e8ed;" />
 
       <section class="output-section">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+        <div class="output-header">
           <h4 id="outp">出力エリア▼</h4>
-          <a id="change" href="javascript:change()">入力⇄出力 入れ替え</a>
+          <div class="output-actions">
+            <a id="change" href="javascript:change()">入力⇄出力 入れ替え</a>
+            <button id="copyOutput" type="button" class="copy-button">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M16 2h-2.18C13.4 0.84 12.3 0 11 0S8.6 0.84 8.18 2H6a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-5 0c.55 0 1 .45 1 1v1h-2V3c0-.55.45-1 1-1zm5 20H6V4h2v2h6V4h2z"
+                  fill="currentColor"
+                />
+              </svg>
+              <span>出力をコピー</span>
+            </button>
+          </div>
         </div>
         <textarea id="outputarea" rows="8" cols="" placeholder="置換結果がここに表示されます"></textarea>
       </section>
@@ -164,7 +172,7 @@
 
       <div id="macro">
         <strong>マクロ機能</strong> - 複数の置換処理を一気に行うマクロが作れます
-        <button id="register" style="margin-left: 15px;">マクロの登録</button>
+        <button id="register">マクロの登録</button>
       </div>
 
       <section class="info-section">

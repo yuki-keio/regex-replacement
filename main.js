@@ -11,6 +11,7 @@ let macro = false;
 let inc = false;
 let mtimes = 1;
 let activeMacro = {};
+let macroMode = false;
 
 // 新しいUI用のヘルパー関数
 let isUpdatingFromUI = false; // 無限ループ防止フラグ
@@ -69,7 +70,6 @@ function syncRegexToPattern() {
 
 // TODO https://www.google.com/search?q=キー+windows+mac+対応+javascript
 function change() {
-  const inputarea = document.getElementById('inputarea');
   const outputarea = document.getElementById('outputarea');
   const regex = document.getElementById('regex');
 
@@ -96,34 +96,39 @@ function escape_html(string) {
     }[match]
   });
 }
+function copyResult(str) {
+  navigator.clipboard.writeText(str).catch(function () {
+    var listener = function (e) {
+      e.clipboardData.setData("text/plain", str);
+      e.preventDefault();
+      document.removeEventListener("copy", listener);
+    };
+
+    document.addEventListener("copy", listener);
+    document.execCommand("copy");
+  });
+}
 function stchange(replace = true) {
-  const inputarea = document.getElementById('inputarea');
   const outputarea = document.getElementById('outputarea');
-  const det = document.getElementById('det');
   const quote = document.getElementById('quote');
   const regok = document.getElementById('regok');
   const regex = document.getElementById('regex');
   const astring = document.getElementById('astring');
-  const copy = document.getElementById('copy');
   const screen = document.querySelector('.screen');
 
   iValue = inputarea.value;
-  if (det.textContent.indexOf("出力をコピー") !== -1) {
-    if (replace) {
-      navigator.clipboard.writeText(outputarea.value);
-      return;
-    }
-    for (program of activeMacro.list) {
-      const regGoing = program[2];
-      if (regGoing) {
-        iValue = iValue.replace(parse_regex(program[0]), program[1]);
-      } else {
-        iValue = iValue.split(program[0]).join(program[1]);
+  if (macroMode) {
+    if (!replace && activeMacro.list) {
+      for (program of activeMacro.list) {
+        const regGoing = program[2];
+        if (regGoing) {
+          iValue = iValue.replace(parse_regex(program[0]), program[1]);
+        } else {
+          iValue = iValue.split(program[0]).join(program[1]);
+        }
       }
-    }
-    outputarea.value = iValue;
-    if (quote.checked) {
-      iValue = '"' + iValue + '"';
+      const macroResult = quote.checked ? '"' + iValue + '"' : iValue;
+      outputarea.value = macroResult;
     }
     return;
   }
@@ -270,21 +275,6 @@ function stchange(replace = true) {
       }
 
       outputarea.value = target;
-      if (copy.checked) {
-        navigator.clipboard.writeText(target).catch(function (e) {
-          console.log("catched");
-          var str = target;
-
-          var listener = function (e) {
-            e.clipboardData.setData("text/plain", str);
-            e.preventDefault();
-            document.removeEventListener("copy", listener);
-          };
-
-          document.addEventListener("copy", listener);
-          document.execCommand("copy");
-        });
-      }
     } else {
       divtext = "";
       let currentPos = 0;
@@ -339,21 +329,6 @@ function stchange(replace = true) {
         target = iValue.split(reg).join(astring.value);
       }
       outputarea.value = target;
-      if (copy.checked) {
-        navigator.clipboard.writeText(target).catch(function (e) {
-          console.log("catched");
-          var str = target;
-
-          var listener = function (e) {
-            e.clipboardData.setData("text/plain", str);
-            e.preventDefault();
-            document.removeEventListener("copy", listener);
-          };
-
-          document.addEventListener("copy", listener);
-          document.execCommand("copy");
-        });
-      }
     } else {
       divtext = "";
       let loop = 0;
@@ -382,6 +357,12 @@ function stchange(replace = true) {
     $("#outputarea").val(target);
 
   }*/
+}
+function autoReplace() {
+  stchange(false);
+  if (!macroMode && !errored) {
+    stchange();
+  }
 }
 let divtext = "";
 let val = "";
@@ -526,20 +507,19 @@ function isNotPC() {
   }
 }
 document.addEventListener('DOMContentLoaded', function () {
+  const inputarea = document.getElementById('inputarea');
   document.getElementById('tocopy').innerHTML =
     '<a href="' + location.href + '">' + location.href + "</a>";
   document.getElementById('regex').addEventListener('change', function () {
-    stchange(false);
+    autoReplace();
     makeURL();
   });
-  if (isNotPC()) {
-    document.getElementById('det').textContent = "置換";
-  } else {
+  if (!isNotPC()) {
     document.getElementById('change').textContent = "入力エリアと出力エリアの内容を入れ替える (Ctrl+I)";
     document.getElementById('register').textContent = "マクロの登録 (Ctrl+M)";
   }
   shortcut.add("Ctrl+Enter", function () {
-    document.getElementById('det').click();
+    copyResult(document.getElementById('outputarea').value);
   });
   shortcut.add("Ctrl+I", function () {
     change();
@@ -569,14 +549,10 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('regex').dispatchEvent(new Event('change'));
       }, 30);
     } else {
-      if (isNotPC()) {
-        document.getElementById('det').textContent = "出力をコピー";
-      } else {
-        document.getElementById('det').textContent = "出力をコピー(Ctrl+Enter)";
-      }
-
       document.querySelector('.description').hidden = true;
       activeMacro = ob;
+      macroMode = true;
+      autoReplace();
     }
   }
   if (content === null) {
@@ -584,22 +560,25 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('inputarea').value = content;
   }
 
-  document.addEventListener("paste", function (e) {
+  inputarea.addEventListener("paste", function (e) {
     document.getElementById('regex').dispatchEvent(new Event('change'));
   });
-  document.getElementById('inputarea').addEventListener('keyup', function () {
+  inputarea.addEventListener('keyup', function () {
     document.getElementById('regex').dispatchEvent(new Event('change'));
   });
   document.getElementById('regex').addEventListener('keyup', function () {
     document.getElementById('regex').dispatchEvent(new Event('change'));
   });
-  document.getElementById('astring').addEventListener('keyup', function () {
+  document.getElementById('astring').addEventListener('input', function () {
     makeURL();
+    autoReplace();
   });
   document.getElementById('copyme').addEventListener('click', function () {
     navigator.clipboard.writeText(document.getElementById('tocopy').textContent);
   });
-  document.getElementById('det').addEventListener('click', stchange);
+  document.getElementById('copyOutput').addEventListener('click', function () {
+    copyResult(document.getElementById('outputarea').value);
+  });
   document.addEventListener("change", function (e) {
     if (e.target.classList.contains('spselect')) {
       if (e.target.value === "") {
@@ -689,41 +668,35 @@ document.addEventListener('DOMContentLoaded', function () {
       regex.dispatchEvent(new Event('change'));
       console.log("通常の検索モードに切り替わりました");
     }
-  });
-
-  // 自動コピー設定の変更時にlocalStorageに保存
-  document.getElementById('copy').addEventListener('change', function (e) {
-    const isChecked = e.target.checked;
-    localStorage.setItem("autoCopy", isChecked.toString());
+    autoReplace();
   });
 
   // クオート設定の変更時にlocalStorageに保存
   document.getElementById('quote').addEventListener('change', function (e) {
     const isChecked = e.target.checked;
     localStorage.setItem("quoteEnabled", isChecked.toString());
+    autoReplace();
   });
 
   // イベントハンドラー設定後にlocalStorageから設定を復元
   const regexEnabled = localStorage.getItem("regexEnabled");
-  if (regexEnabled === "true") {
+  if (regexEnabled === "true" || regexEnabled === null) {
     document.getElementById('regok').checked = true;
     // 正規表現モードのUIを表示
     document.getElementById('regexMode').style.display = 'block';
     document.getElementById('regex').style.display = 'none';
     document.querySelector('.storreg').textContent = "正規表現　　 ";
     document.getElementById('regok').dispatchEvent(new Event('change'));
-  } else if (regexEnabled === null) {
-    // 初回訪問時はデフォルトでfalse
-    localStorage.setItem("regexEnabled", "false");
-  }
-
-  // localStorageから自動コピーの設定を復元
-  const autoCopy = localStorage.getItem("autoCopy");
-  if (autoCopy === "false") {
-    document.getElementById('copy').checked = false;
-  } else if (autoCopy === null) {
-    // 初回訪問時はデフォルトでtrue（HTMLのchecked属性に従う）
-    localStorage.setItem("autoCopy", "true");
+    if (regexEnabled === null) {
+      // 初回訪問時は正規表現モードをデフォルトで有効化
+      localStorage.setItem("regexEnabled", "true");
+    }
+  } else {
+    document.getElementById('regok').checked = false;
+    document.getElementById('regexMode').style.display = 'none';
+    document.getElementById('regex').style.display = 'block';
+    document.querySelector('.storreg').textContent = "検索する文字 ";
+    document.getElementById('regok').dispatchEvent(new Event('change'));
   }
 
   // localStorageからクオートの設定を復元
