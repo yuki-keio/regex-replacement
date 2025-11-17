@@ -502,4 +502,9 @@ button:disabled:hover {
   .copy-button {
     border-radius: 12px;
   }
+  #change {
+    position: relative;
+    bottom: -8px;
+    padding: 10px 0 10px 0;
+  }
 }
