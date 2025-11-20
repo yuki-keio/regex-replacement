@@ -496,7 +496,7 @@ function showurl(jsonv = undefined) {
     query += "&content=" + encodeURIComponent(document.getElementById('inputarea').value);
   }
   document.getElementById('tocopy').innerHTML = '<a href="' + base + query + '">' + base + query + "</a>";
-  history.replaceState("", "", "index.html" + query);
+  history.replaceState("", "", query);
   return base + query;
 }
 function isNotPC() {
